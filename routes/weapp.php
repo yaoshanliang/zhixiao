@@ -14,9 +14,13 @@ Route::group(['prefix' => 'weapp', 'namespace' => 'WeApp'], function () {
 
         });
 
+        Route::group(['prefix' => 'subject'], function () {
+            Route::get('/getAllSubjects', 'SubjectController@getAllSubjects');
+            Route::get('/chooseSubject', 'SubjectController@chooseSubject');
+            Route::get('/getMySubject', 'SubjectController@getMySubject');
+        });
+
         Route::group(['prefix' => 'question'], function () {
-            Route::get('/subjects', 'QuestionController@getSubjects');
-            Route::get('/chooseSubject', 'QuestionController@chooseSubject');
             Route::get('/modules', 'QuestionController@getModules');
             Route::get('/questions', 'QuestionController@getQuestions');
         });

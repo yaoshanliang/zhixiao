@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\Subject;
 use App\Models\User;
 
-class QuestionController extends Controller
+class SubjectController extends Controller
 {
     public function getAllSubjects(Request $request)
     {
