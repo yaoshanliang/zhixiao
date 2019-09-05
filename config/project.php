@@ -3,7 +3,7 @@
 return [
 
     // 项目配置
-    'name' => 'xxx',
+    'name' => '知晓学堂',
     'web_name' => '',
     'admin_name' => '管理后台',
 
