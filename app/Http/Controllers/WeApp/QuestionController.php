@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\WeApp;
 use Illuminate\Http\Request;
 use App\Models\Subject;
+use App\Models\Question;
 use App\Models\User;
+use DB;
 
 class QuestionController extends Controller
 {
-    public function getAllSubjects(Request $request)
+    public function getQuestions(Request $request)
     {
-        $data = Subject::get();
-        $subjects = [];
-        foreach($data as $v) {
-            $subjects[$v->subject_type_name][] = $v;
-        }
-        $data = [];
-        foreach($subjects as $k => $v) {
-            $data[] = ['name' => $k, 'list' => $v];
+
+        if ($request->moduleCode) {
+            $data = DB::table($request->subjectCode . '_questions')->where('module_code', $request->moduleCode)->skip($request->page * 50)->take(50)->get();
+            // $data = Question::where('module_id', $request->moduleId)->get();
         }
 
         return weappReturn(SUCCESS, '获取成功', $data);

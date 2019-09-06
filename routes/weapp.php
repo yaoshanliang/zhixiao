@@ -21,8 +21,7 @@ Route::group(['prefix' => 'weapp', 'namespace' => 'WeApp'], function () {
         });
 
         Route::group(['prefix' => 'question'], function () {
-            Route::get('/modules', 'QuestionController@getModules');
-            Route::get('/questions', 'QuestionController@getQuestions');
+            Route::get('/getQuestions', 'QuestionController@getQuestions');
         });
     
     });

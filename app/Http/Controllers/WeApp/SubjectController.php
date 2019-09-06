@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WeApp;
 use Illuminate\Http\Request;
 use App\Models\Subject;
+use App\Models\Module;
 use App\Models\User;
 
 class SubjectController extends Controller
@@ -12,7 +13,7 @@ class SubjectController extends Controller
         $data = Subject::get();
         $subjects = [];
         foreach($data as $v) {
-            $subjects[$v->subject_type_name][] = $v;
+            $subjects[$v->subject_code][] = $v;
         }
         $data = [];
         foreach($subjects as $k => $v) {
@@ -25,7 +26,7 @@ class SubjectController extends Controller
     public function chooseSubject(Request $request)
     {
         User::where('id', getWeappUserId())->update([
-            'subject_id' => $request->subjectId,
+            'subject_code' => $request->subjectCode,
             'subject_name' => $request->subjectName
         ]);
 
@@ -34,9 +35,23 @@ class SubjectController extends Controller
 
     public function getMySubject(Request $request)
     {
-        $data = User::where('id', getWeappUserId())->first(['subject_name']);
+        $subject = User::where('id', getWeappUserId())->first(['subject_code', 'subject_name']);
 
-        return weappReturn(SUCCESS, '获取成功', $data);
+        if ($subject->subject_code) {
+            $data = Module::where('subject_code', $subject->subject_code)->get();
+            $temp = [];
+            foreach($data as $v) {
+                $temp[$v->module_type][] = $v;
+            }
+            $modules = [];
+            foreach($temp as $k => $v) {
+                $modules[] = ['name' => $k, 'list' => $v];
+            }
+        } else {
+            $modules = [];
+        }
+
+        return weappReturn(SUCCESS, '获取成功', ['subject_code' => $subject->subject_code, 'subject_name' => $subject->subject_name, 'modules' => $modules]);
     }
 
     public function updateUserInfo(Request $request)
