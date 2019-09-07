@@ -11,13 +11,17 @@ class QuestionController extends Controller
 {
     public function getQuestions(Request $request)
     {
-
         if ($request->moduleCode) {
             $data = DB::table($request->subjectCode . '_questions')->where('module_code', $request->moduleCode)->skip($request->page * 50)->take(50)->get();
-            // $data = Question::where('module_id', $request->moduleId)->get();
+            $count = DB::table($request->subjectCode . '_questions')->where('module_code', $request->moduleCode)->count();
+        }
+        $myAnswer = [];
+        foreach($data as &$v) {
+            $v->options = json_decode($v->options);
+            $myAnswer[$v->id] = '';
         }
 
-        return weappReturn(SUCCESS, '获取成功', $data);
+        return weappReturn(SUCCESS, '获取成功', ['count' => $count, 'list' => $data, 'myAnswer' => $myAnswer]);
     }
 
     public function chooseSubject(Request $request)
