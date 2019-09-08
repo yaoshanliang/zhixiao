@@ -12,8 +12,9 @@ class QuestionController extends Controller
     public function getQuestions(Request $request)
     {
         if ($request->moduleCode) {
-            $data = DB::table($request->subjectCode . '_questions')->where('module_code', $request->moduleCode)->skip($request->page * 50)->take(50)->get();
+            $data = DB::table($request->subjectCode . '_questions')->select('id', 'title', 'options', 'answer', 'type', 'analysis')->where('module_code', $request->moduleCode)->skip($request->page * 100)->take(100)->get();
             $count = DB::table($request->subjectCode . '_questions')->where('module_code', $request->moduleCode)->count();
+            $ids = DB::table($request->subjectCode . '_questions')->get(['id']);
         }
         $myAnswer = [];
         foreach($data as &$v) {
