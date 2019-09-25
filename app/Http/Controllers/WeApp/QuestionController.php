@@ -19,8 +19,13 @@ class QuestionController extends Controller
         $myAnswer = [];
         foreach($data as &$v) {
             $v->options = json_decode($v->options);
-            $myAnswer[$v->id] = '';
+            $v->myAnswer = '';
+            $v->myAnswerStatus = 0;// 0：未作答，1：正确；2：不正确
+            // $myAnswer[$v->id] = '';
         }
+        // foreach($ids as &$v) {
+        // }
+
 
         return weappReturn(SUCCESS, '获取成功', ['count' => $count, 'list' => $data, 'myAnswer' => $myAnswer]);
     }

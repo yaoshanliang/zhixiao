@@ -13,7 +13,7 @@ class SubjectController extends Controller
         $data = Subject::get();
         $subjects = [];
         foreach($data as $v) {
-            $subjects[$v->subject_code][] = $v;
+            $subjects[$v->subject_type][] = $v;
         }
         $data = [];
         foreach($subjects as $k => $v) {
