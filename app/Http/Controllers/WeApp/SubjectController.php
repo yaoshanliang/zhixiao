@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 use App\Models\Subject;
 use App\Models\Module;
 use App\Models\User;
+use App\Models\UserAnswer;
+use DB;
 
 class SubjectController extends Controller
 {
@@ -39,8 +41,23 @@ class SubjectController extends Controller
 
         if ($subject->subject_code) {
             $data = Module::where('subject_code', $subject->subject_code)->get();
+            $count = DB::table($subject->subject_code . '_questions')->groupby('module_code')->get(['module_code', DB::raw("count(id) as count")]);
+            $countArray = [];
+            foreach($count as $v) {
+                $countArray[$v->module_code] = $v->count;
+            }
+
+            $count = UserAnswer::where('user_id', getWeappUserId())->where('subject_code', $subject->subject_code)->where('status', '!=', 0)
+                ->groupby('module_code')->get(['module_code', DB::raw("count(id) as count")]);
+            $countAnswer = [];
+            foreach($count as $v) {
+                $countAnswer[$v->module_code] = $v->count;
+            }
+
             $temp = [];
             foreach($data as $v) {
+                $v->total_count = $countArray[$v->module_code] ?? 0;
+                $v->done_count = $countAnswer[$v->module_code] ?? 0;;
                 $temp[$v->module_type][] = $v;
             }
             $modules = [];

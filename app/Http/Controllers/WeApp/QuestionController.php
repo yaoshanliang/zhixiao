@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\Subject;
 use App\Models\Question;
 use App\Models\User;
+use App\Models\UserAnswer;
 use DB;
 
 class QuestionController extends Controller
@@ -15,45 +16,56 @@ class QuestionController extends Controller
             $data = DB::table($request->subjectCode . '_questions')->select('id', 'title', 'options', 'answer', 'type', 'analysis')->where('module_code', $request->moduleCode)->skip($request->page * 100)->take(100)->get();
             $count = DB::table($request->subjectCode . '_questions')->where('module_code', $request->moduleCode)->count();
             $ids = DB::table($request->subjectCode . '_questions')->get(['id']);
+
+            $myAnswer = UserAnswer::where('user_id', getWeappUserId())->where('module_code', $request->moduleCode)->get();
+            $myAnswerArray = [];
+            $correctNum = 0;
+            $errorNum = 0;
+            foreach($myAnswer as $v) {
+                if ($v->status == 1) {
+                    $correctNum++;
+                }
+                if ($v->status == 2) {
+                    $errorNum++;
+                }
+                $myAnswerArray[$v->question_id] = $v;
+            }
         }
-        $myAnswer = [];
+        $myAnswerList = [];
         foreach($data as &$v) {
             $v->options = json_decode($v->options);
-            $v->myAnswer = '';
-            $v->myAnswerStatus = 0;// 0：未作答，1：正确；2：不正确
-            // $myAnswer[$v->id] = '';
-        }
-        // foreach($ids as &$v) {
-        // }
-
-
-        return weappReturn(SUCCESS, '获取成功', ['count' => $count, 'list' => $data, 'myAnswer' => $myAnswer]);
-    }
-
-    public function chooseSubject(Request $request)
-    {
-        User::where('id', getWeappUserId())->update([
-            'subject_id' => $request->subjectId,
-            'subject_name' => $request->subjectName
-        ]);
-
-        return weappReturn(SUCCESS, '切换成功');
-    }
-
-    public function getMySubject(Request $request)
-    {
-        $data = User::where('id', getWeappUserId())->first(['subject_name']);
-
-        return weappReturn(SUCCESS, '获取成功', $data);
-    }
-
-    public function updateUserInfo(Request $request)
-    {
-        if (! $request->nickname) {
-            return weappReturn(ERROR, '昵称必填');
+            if (isset($myAnswerArray[$v->id])) {
+                $myAnswerList[] = ['question_id' => $v->id, 'answer' => $myAnswerArray[$v->id]['answer'], 'status' => $myAnswerArray[$v->id]['status'], 'collect' => $myAnswerArray[$v->id]['collect']];
+            } else {
+                $myAnswerList[] = ['question_id' => $v->id, 'answer' => '', 'status' => 0, 'collect' => 0];
+            }
         }
 
-        $user = User::where('id', getWeappUserId())->update(['weapp_nickname' => $request->nickname]);
+        return weappReturn(SUCCESS, '获取成功', ['count' => $count, 'list' => $data, 'myAnswerList' => $myAnswerList, 'correctNum' => $correctNum, 'errorNum' => $errorNum]);
+    }
+
+    public function postAnswers(Request $request)
+    {
+        if (! $request->myAnswerList) {
+            return weappReturn(ERROR, '答案必填');
+        }
+        foreach ($request->myAnswerList as $v) {
+            if ($v['status'] || $v['collect']) {
+                if (UserAnswer::where('user_id', getWeappUserId())->where('module_code', $request->moduleCode)->where('question_id', $v['question_id'])->exists()) {
+                    UserAnswer::where('user_id', getWeappUserId())->where('module_code', $request->moduleCode)->where('question_id', $v['question_id'])->update([
+                        'answer' => $v['answer'], 'status' => $v['status'], 'collect' => $v['collect']
+                    ]);
+                } else {
+                    UserAnswer::create([
+                        'user_id' => getWeappUserId(), 'subject_code' => $request->subjectCode, 'module_code' => $request->moduleCode,
+                        'question_id' => $v['question_id'], 'answer' => $v['answer'], 'status' => $v['status'], 'collect' => $v['collect']
+                    ]);
+                }
+            }
+            if (! $v['status'] && ! $v['collect']) {
+                UserAnswer::where('user_id', getWeappUserId())->where('module_code', $request->moduleCode)->where('question_id', $v['question_id'])->delete();
+            }
+        }
 
         return weappReturn(SUCCESS, '保存成功');
     }
