@@ -55,10 +55,15 @@ class SubjectController extends Controller
             }
 
             $temp = [];
+            $totalCount = 0;
+            $doneCount = 0;
             foreach($data as $v) {
                 $v->total_count = $countArray[$v->module_code] ?? 0;
-                $v->done_count = $countAnswer[$v->module_code] ?? 0;;
+                $v->done_count = $countAnswer[$v->module_code] ?? 0;
                 $temp[$v->module_type][] = $v;
+
+                $totalCount += $v->total_count;
+                $doneCount += $v->done_count;
             }
             $modules = [];
             foreach($temp as $k => $v) {
@@ -68,7 +73,10 @@ class SubjectController extends Controller
             $modules = [];
         }
 
-        return weappReturn(SUCCESS, '获取成功', ['subject_code' => $subject->subject_code, 'subject_name' => $subject->subject_name, 'modules' => $modules]);
+        return weappReturn(SUCCESS, '获取成功', [
+            'subject_code' => $subject->subject_code, 'subject_name' => $subject->subject_name, 'modules' => $modules, 
+            'totalCount' => $totalCount, 'doneCount' => $doneCount
+        ]);
     }
 
     public function updateUserInfo(Request $request)
