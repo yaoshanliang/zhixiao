@@ -69,13 +69,14 @@ class SubjectController extends Controller
             foreach($temp as $k => $v) {
                 $modules[] = ['name' => $k, 'list' => $v];
             }
+            $errorCount = UserAnswer::where('user_id', getWeappUserId())->where('subject_code', $subject->subject_code)->where('status', 2)->count();
         } else {
             $modules = [];
         }
 
         return weappReturn(SUCCESS, '获取成功', [
             'subject_code' => $subject->subject_code, 'subject_name' => $subject->subject_name, 'modules' => $modules, 
-            'totalCount' => $totalCount, 'doneCount' => $doneCount
+            'totalCount' => $totalCount, 'doneCount' => $doneCount, 'errorCount' => $errorCount
         ]);
     }
 
