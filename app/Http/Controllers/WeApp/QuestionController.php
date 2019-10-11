@@ -22,8 +22,6 @@ class QuestionController extends Controller
         // 按模块
         if ($request->type == 'module') {
             $myAnswer = UserAnswer::where('user_id', getWeappUserId())->where('module_code', $request->moduleCode)->get();
-            $correctNum = 0;
-            $errorNum = 0;
             $myAnswerIds = [];
             foreach($myAnswer as $v) {
                 $myAnswerArray[$v->question_id] = $v;
@@ -46,12 +44,6 @@ class QuestionController extends Controller
 
             $myAnswerIds = [];
             foreach($myAnswer as $v) {
-                if ($v->status == 1) {
-                    $correctNum++;
-                }
-                if ($v->status == 2) {
-                    $errorNum++;
-                }
                 $myAnswerArray[$v->question_id] = $v;
                 $myAnswerIds[] = $v->question_id;
             }

@@ -39,6 +39,9 @@ class SubjectController extends Controller
     {
         $subject = User::where('id', getWeappUserId())->first(['subject_code', 'subject_name']);
 
+        $totalCount = 0;
+        $doneCount = 0;
+        $errorCount = 0;
         if ($subject->subject_code) {
             $data = Module::where('subject_code', $subject->subject_code)->get();
             $count = DB::table($subject->subject_code . '_questions')->groupby('module_code')->get(['module_code', DB::raw("count(id) as count")]);
@@ -55,8 +58,7 @@ class SubjectController extends Controller
             }
 
             $temp = [];
-            $totalCount = 0;
-            $doneCount = 0;
+            
             foreach($data as $v) {
                 $v->total_count = $countArray[$v->module_code] ?? 0;
                 $v->done_count = $countAnswer[$v->module_code] ?? 0;
